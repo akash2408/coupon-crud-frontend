@@ -231,7 +231,7 @@ const ViewCoupon = () => {
 
       <div className="flex items-center justify-between">
         <Link
-          to={`/update/${coupon_id}`}
+          to={`/coupon/update/${coupon_id}`}
           className="mt-5 bg-green-400 w-full hover:bg-green-500 text-white text-center font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
         >
           Edit Coupon
