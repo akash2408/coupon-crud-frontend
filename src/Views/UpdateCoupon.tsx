@@ -56,7 +56,6 @@ const UpdateCoupon = () => {
       const url = `${baseURL}/coupon/${coupon_id}`;
 
       const response = await axios.get(url);
-
       const data = response.data;
 
       if (data) {
@@ -68,11 +67,14 @@ const UpdateCoupon = () => {
         const end_date = couponData.end_date
           ? moment(couponData.start_date.toString()).format("YYYY-MM-DD")
           : null;
+
+        console.log(couponData);
         setCoupon({
           ...couponData,
-          dfs: dfs.toString(),
+          dfs: couponData.dfs ? dfs.toString() : null,
           start_date: start_date.toString(),
           end_date: end_date,
+          age_groups: couponData.age_groups ? couponData.age_groups : [],
         });
       }
     } catch (err) {
@@ -216,7 +218,10 @@ const UpdateCoupon = () => {
         type: coupon.type,
         discount: coupon.discount,
         start_date: coupon.start_date,
-        end_date: coupon.end_date,
+        end_date:
+          coupon.end_date && coupon.end_date.toString().trim().length !== 0
+            ? coupon.end_date
+            : null,
         category: coupon.category,
         age_groups: coupon.age_groups,
         dfs: newdfs,
@@ -245,6 +250,7 @@ const UpdateCoupon = () => {
       }
     }
   };
+
   const inputEvent = (event: any) => {
     const { name, value } = event.target;
     setCoupon((preValue) => {
@@ -443,30 +449,31 @@ const UpdateCoupon = () => {
             Age Group
           </label>
           <div className="flex flex-row">
-            {coupon.age_groups.map((age_group: AgeGroup, index) => {
-              return (
-                <div key={index} className="flex flex-row">
-                  <div className="bg-white shadow-md px-4 py-2 ml-4">
-                    {age_group.start_age} - {age_group.end_age}
+            {coupon.age_groups &&
+              coupon.age_groups.map((age_group: AgeGroup, index) => {
+                return (
+                  <div key={index} className="flex flex-row">
+                    <div className="bg-white shadow-md px-4 py-2 ml-4">
+                      {age_group.start_age} - {age_group.end_age}
+                    </div>
+                    <button
+                      onClick={(event: any) => {
+                        event.preventDefault();
+                        coupon.age_groups.splice(index, 1);
+                        setCoupon((prev) => {
+                          return {
+                            ...prev,
+                            age_groups: coupon.age_groups,
+                          };
+                        });
+                      }}
+                      className="w-10 h-10 bg-red-600 rounded-sm items-center justify-center flex flex-col"
+                    >
+                      <Delete size={30} color={"#FFFFFF"} />
+                    </button>
                   </div>
-                  <button
-                    onClick={(event: any) => {
-                      event.preventDefault();
-                      coupon.age_groups.splice(index, 1);
-                      setCoupon((prev) => {
-                        return {
-                          ...prev,
-                          age_groups: coupon.age_groups,
-                        };
-                      });
-                    }}
-                    className="w-10 h-10 bg-red-600 rounded-sm items-center justify-center flex flex-col"
-                  >
-                    <Delete size={30} color={"#FFFFFF"} />
-                  </button>
-                </div>
-              );
-            })}
+                );
+              })}
           </div>
           <div className="w-full flex flex-row justify-center mt-2">
             <NewAgeGroup age_groups={coupon.age_groups} setCoupon={setCoupon} />
@@ -488,7 +495,7 @@ const UpdateCoupon = () => {
             value={coupon.dfs ? coupon.dfs : ""}
             onChange={inputEvent}
             type="text"
-            placeholder="Enter code"
+            placeholder="1,2,3,"
           />
         </div>
       )}

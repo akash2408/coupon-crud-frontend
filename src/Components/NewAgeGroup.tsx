@@ -88,7 +88,8 @@ const NewAgeGroup = ({ age_groups, setCoupon }: Props) => {
     if (
       newAgeGroup.end_age &&
       newAgeGroup.start_age &&
-      newAgeGroup.end_age <= newAgeGroup.start_age
+      parseInt(newAgeGroup.end_age.toString()) <=
+        parseInt(newAgeGroup.start_age.toString())
     ) {
       valid = false;
       setError((preValue: any) => {

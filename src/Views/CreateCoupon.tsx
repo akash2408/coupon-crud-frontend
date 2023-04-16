@@ -427,30 +427,31 @@ const CreateCoupon = () => {
             Age Group
           </label>
           <div className="flex flex-row">
-            {coupon.age_groups.map((age_group: AgeGroup, index) => {
-              return (
-                <div key={index} className="flex flex-row">
-                  <div className="bg-white shadow-md px-4 py-2 ml-4">
-                    {age_group.start_age} - {age_group.end_age}
+            {coupon.age_groups &&
+              coupon.age_groups.map((age_group: AgeGroup, index) => {
+                return (
+                  <div key={index} className="flex flex-row">
+                    <div className="bg-white shadow-md px-4 py-2 ml-4">
+                      {age_group.start_age} - {age_group.end_age}
+                    </div>
+                    <button
+                      onClick={(event: any) => {
+                        event.preventDefault();
+                        coupon.age_groups.splice(index, 1);
+                        setCoupon((prev) => {
+                          return {
+                            ...prev,
+                            age_groups: coupon.age_groups,
+                          };
+                        });
+                      }}
+                      className="w-10 h-10 bg-red-600 rounded-sm items-center justify-center flex flex-col"
+                    >
+                      <Delete size={30} color={"#FFFFFF"} />
+                    </button>
                   </div>
-                  <button
-                    onClick={(event: any) => {
-                      event.preventDefault();
-                      coupon.age_groups.splice(index, 1);
-                      setCoupon((prev) => {
-                        return {
-                          ...prev,
-                          age_groups: coupon.age_groups,
-                        };
-                      });
-                    }}
-                    className="w-10 h-10 bg-red-600 rounded-sm items-center justify-center flex flex-col"
-                  >
-                    <Delete size={30} color={"#FFFFFF"} />
-                  </button>
-                </div>
-              );
-            })}
+                );
+              })}
           </div>
           <div className="w-full flex flex-row justify-center mt-2">
             <NewAgeGroup age_groups={coupon.age_groups} setCoupon={setCoupon} />
@@ -472,7 +473,7 @@ const CreateCoupon = () => {
             value={coupon.dfs ? coupon.dfs : ""}
             onChange={inputEvent}
             type="text"
-            placeholder="Enter code"
+            placeholder="1,2,3,"
           />
         </div>
       )}
