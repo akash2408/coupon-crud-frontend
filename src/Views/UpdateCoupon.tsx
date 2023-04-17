@@ -376,7 +376,7 @@ const UpdateCoupon = () => {
           value={coupon.start_date ? coupon.start_date.toString() : ""}
           onChange={inputEvent}
           type="text"
-          placeholder="Enter start date"
+          placeholder="2023-04-16"
         />
         {error.start_date && (
           <div className=" text-red-900 text-xs mt-2">{error.start_date}</div>
@@ -396,7 +396,7 @@ const UpdateCoupon = () => {
           value={coupon.end_date ? coupon.end_date.toString() : ""}
           onChange={inputEvent}
           type="text"
-          placeholder="Enter end date"
+          placeholder="2023-04-16"
         />
       </div>
 
