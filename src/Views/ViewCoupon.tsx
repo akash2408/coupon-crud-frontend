@@ -66,7 +66,7 @@ const ViewCoupon = () => {
   }, [fetchCoupon]);
 
   return (
-    <div className="w-full max-w-sm container mt-20 mb-10  mx-auto">
+    <div className="w-full max-w-sm container mt-20 mb-10  mx-auto px-4">
       <div className="w-full mb-5">
         <label
           className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"

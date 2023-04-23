@@ -277,7 +277,7 @@ const CreateCoupon = () => {
 
   return (
     <form
-      className="w-full max-w-sm container mt-20 mb-10 mx-auto"
+      className="w-full max-w-sm container mt-20 mb-10 mx-auto px-4"
       onSubmit={validateCoupon}
     >
       <div className="w-full mb-5">
