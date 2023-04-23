@@ -45,15 +45,17 @@ const UpdateCoupon = () => {
     discount: null,
     start_date: null,
     category: null,
+    dfs: null,
+    age_groups: null,
   });
 
   const params = useParams();
-  const coupon_id = params.coupon_id;
+  const code = params.code;
   const navigate = useNavigate();
 
   const fetchCoupon = useCallback(async () => {
     try {
-      const url = `${baseURL}/coupon/${coupon_id}`;
+      const url = `${baseURL}/coupon/${code}`;
 
       const response = await axios.get(url);
       const data = response.data;
@@ -65,10 +67,8 @@ const UpdateCoupon = () => {
           "YYYY-MM-DD"
         );
         const end_date = couponData.end_date
-          ? moment(couponData.start_date.toString()).format("YYYY-MM-DD")
+          ? moment(couponData.end_date.toString()).format("YYYY-MM-DD")
           : null;
-
-        console.log(couponData);
         setCoupon({
           ...couponData,
           dfs: couponData.dfs ? dfs.toString() : null,
@@ -84,7 +84,7 @@ const UpdateCoupon = () => {
         navigate("/404", { replace: true });
       }
     }
-  }, [coupon_id]);
+  }, [code]);
 
   useEffect(() => {
     fetchCoupon();
@@ -100,6 +100,8 @@ const UpdateCoupon = () => {
       discount: null,
       start_date: null,
       category: null,
+      dfs: null,
+      age_groups: null,
     });
 
     var valid = true;
@@ -110,16 +112,6 @@ const UpdateCoupon = () => {
         return {
           ...preValue,
           name: "name cannot be empty",
-        };
-      });
-    }
-
-    if (!coupon.code || coupon.code.trim().length === 0) {
-      valid = false;
-      setError((preValue: any) => {
-        return {
-          ...preValue,
-          code: "code cannot be empty",
         };
       });
     }
@@ -144,30 +136,10 @@ const UpdateCoupon = () => {
       });
     }
 
-    if (!coupon.start_date) {
-      valid = false;
-      setError((preValue: any) => {
-        return {
-          ...preValue,
-          location: "start date cannot be empty",
-        };
-      });
-    }
-
-    if (!coupon.start_date) {
-      valid = false;
-      setError((preValue: any) => {
-        return {
-          ...preValue,
-          start_date: "start date cannot be empty",
-        };
-      });
-    }
-
     if (
       coupon.start_date &&
       coupon.end_date &&
-      coupon.end_date <= coupon.start_date
+      coupon.end_date < coupon.start_date
     ) {
       valid = false;
       setError((preValue: any) => {
@@ -188,7 +160,58 @@ const UpdateCoupon = () => {
       });
     }
 
-    console.log(valid);
+    if (
+      coupon.category === CouponCategory.DFS &&
+      (!coupon.dfs || (coupon.dfs && coupon.dfs.trim().length === 0))
+    ) {
+      valid = false;
+      setError((preValue: any) => {
+        return {
+          ...preValue,
+          dfs: "DFS cannot be empty",
+        };
+      });
+    }
+
+    if (coupon.category === CouponCategory.DFS) {
+      if (coupon.dfs) {
+        let newdfs = null;
+        let dfs = coupon.dfs;
+        const len = coupon.dfs.length;
+        if (coupon.dfs[len - 1] === ",") {
+          dfs = coupon.dfs.substring(0, len - 1);
+        }
+
+        newdfs = dfs.split(",").map(Number);
+
+        for (let days of newdfs) {
+          if (!days || days < 0) {
+            valid = false;
+            setError((preValue: any) => {
+              return {
+                ...preValue,
+                dfs: "DFS format is not correct",
+              };
+            });
+            break;
+          }
+        }
+      }
+    }
+
+    if (
+      coupon.category === CouponCategory.AGE_GROUP &&
+      (!coupon.dfs || (coupon.age_groups && coupon.age_groups.length === 0))
+    ) {
+      valid = false;
+      setError((preValue: any) => {
+        return {
+          ...preValue,
+          age_groups: "At least 1 age group should be present",
+        };
+      });
+    }
+
     if (!valid) {
       return;
     }
@@ -213,7 +236,7 @@ const UpdateCoupon = () => {
       }
 
       const body = {
-        coupon_id: coupon_id,
+        code: code,
         name: coupon.name,
         type: coupon.type,
         discount: coupon.discount,
@@ -226,18 +249,14 @@ const UpdateCoupon = () => {
         age_groups: coupon.age_groups,
         dfs: newdfs,
       };
-
-      console.log(body);
       const response = await axios.patch(url, body);
 
       const data = response.data;
-      console.log(data);
       if (data) {
-        console.log(data);
         if (data.msg) {
           toast.success(data?.msg);
         }
-        navigate(`/coupon/${coupon_id}`, { replace: true });
+        navigate(`/coupon`, { replace: true });
       }
     } catch (err) {
       const axiosError = err as AxiosError;
@@ -368,15 +387,14 @@ const UpdateCoupon = () => {
           className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
           htmlFor="start_date"
         >
-          Start Date
+          Start Date (Optional)
         </label>
         <input
           className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:text-gray-600"
           name="start_date"
           value={coupon.start_date ? coupon.start_date.toString() : ""}
           onChange={inputEvent}
-          type="text"
-          placeholder="2023-04-16"
+          type="date"
         />
         {error.start_date && (
           <div className=" text-red-900 text-xs mt-2">{error.start_date}</div>
@@ -395,8 +413,7 @@ const UpdateCoupon = () => {
           name="end_date"
           value={coupon.end_date ? coupon.end_date.toString() : ""}
           onChange={inputEvent}
-          type="text"
-          placeholder="2023-04-16"
+          type="date"
         />
       </div>
 
@@ -478,6 +495,9 @@ const UpdateCoupon = () => {
           <div className="w-full flex flex-row justify-center mt-2">
             <NewAgeGroup age_groups={coupon.age_groups} setCoupon={setCoupon} />
           </div>
+          {error.age_groups && (
+            <div className=" text-red-900 text-xs mt-2">{error.age_groups}</div>
+          )}
         </div>
       )}
 
@@ -497,6 +517,9 @@ const UpdateCoupon = () => {
             type="text"
             placeholder="1,2,3,"
           />
+          {error.dfs && (
+            <div className=" text-red-900 text-xs mt-2">{error.dfs}</div>
+          )}
         </div>
       )}
 

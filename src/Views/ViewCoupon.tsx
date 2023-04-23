@@ -33,19 +33,18 @@ const ViewCoupon = () => {
   });
 
   const params = useParams();
-  const coupon_id = params.coupon_id;
+  const code = params.code;
   const navigate = useNavigate();
 
   const fetchCoupon = useCallback(async () => {
     try {
-      const url = `${baseURL}/coupon/${coupon_id}`;
+      const url = `${baseURL}/coupon/${code}`;
 
       const response = await axios.get(url);
 
       const data = response.data;
 
       if (data) {
-        console.log(data);
         const couponData = data.coupon;
         setCoupon(couponData);
       }
@@ -60,7 +59,7 @@ const ViewCoupon = () => {
         navigate("/404", { replace: true });
       }
     }
-  }, [coupon_id]);
+  }, [code]);
 
   useEffect(() => {
     fetchCoupon();
@@ -142,7 +141,7 @@ const ViewCoupon = () => {
           name="start_date"
           value={
             coupon.start_date
-              ? moment(coupon.start_date.toString()).format("YYYY-MM-DD")
+              ? moment(coupon.start_date.toString()).format("DD-MM-YYYY")
               : "NULL"
           }
           disabled={true}
@@ -163,7 +162,7 @@ const ViewCoupon = () => {
           name="end_date"
           value={
             coupon.end_date
-              ? moment(coupon.end_date.toString()).format("YYYY-MM-DD")
+              ? moment(coupon.end_date.toString()).format("DD-MM-YYYY")
               : "NULL"
           }
           disabled={true}
@@ -231,7 +230,7 @@ const ViewCoupon = () => {
 
       <div className="flex items-center justify-between">
         <Link
-          to={`/coupon/update/${coupon_id}`}
+          to={`/coupon/update/${code}`}
           className="mt-5 bg-green-400 w-full hover:bg-green-500 text-white text-center font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
         >
           Edit Coupon

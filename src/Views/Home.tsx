@@ -1,13 +1,13 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import axios, { AxiosError, AxiosInstance } from "axios";
-import { Link } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { baseURL } from "../Constants/urls";
+import Pagination from "../Components/Pagination";
 
 interface Coupon {
   category: string;
   code: string;
-  coupon_id: number;
   created_at: Date;
   deleted_at: Date | null;
   discount: number;
@@ -17,17 +17,49 @@ interface Coupon {
   type: string;
 }
 
+interface Page {
+  currentPage: number;
+  currentLimit: number;
+  totalPages: number | null;
+  total: number | null;
+  previous: {
+    page: number;
+    limit: number;
+  } | null;
+  next: {
+    page: number;
+    limit: number;
+  } | null;
+}
+
 const Home = () => {
   const [couponList, setCouponList] = useState<Array<Coupon>>([]);
+  const memoizedCouponList = useMemo(() => couponList, [couponList]);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const [page, setPage] = useState<Page>({
+    currentPage: 1,
+    currentLimit: 10,
+    total: null,
+    totalPages: null,
+    previous: null,
+    next: null,
+  });
 
   const fetchCoupons = useCallback(async () => {
     try {
-      const url = `${baseURL}/coupon`;
+      const currPage = searchParams.get("page") || 1;
+      const currLimit = searchParams.get("limit") || 10;
+
+      const url = `${baseURL}/coupon?page=${
+        parseInt(currPage.toString()) || 1
+      }&limit=${parseInt(currLimit.toString()) || 10}`;
+
       const response = await axios.get(url);
       const data = response.data;
       if (data) {
-        console.log(data);
-        setCouponList(data.couponsList);
+        setPage(data.result);
+        setCouponList(data.result.couponsList);
       }
     } catch (err) {
       const axiosError = err as AxiosError;
@@ -39,19 +71,18 @@ const Home = () => {
         }
       }
     }
-  }, []);
+  }, [searchParams]);
 
   useEffect(() => {
     fetchCoupons();
   }, [fetchCoupons]);
 
-  const deleteCoupon = async (coupon_id: number) => {
+  const deleteCoupon = async (code: string) => {
     try {
-      const url = `${baseURL}/coupon/${coupon_id}`;
+      const url = `${baseURL}/coupon/${code}`;
       const response = await axios.delete(url);
       const data = response.data;
       if (data) {
-        console.log(data);
         if (data.msg) {
           toast.success(data?.msg);
         }
@@ -66,7 +97,7 @@ const Home = () => {
   };
 
   return (
-    <div className="w-full flex flex-col items-center justify-center">
+    <div className="w-full sm:w-[70%] lg:w-[60%] flex flex-col items-center justify-center mx-auto px-4">
       <h3 className="text-center mt-20 text-3xl leading-8 text-black font-bold tracking-wide">
         Admin Panel for Coupons
       </h3>
@@ -115,14 +146,14 @@ const Home = () => {
           </button>
         </Link>
       </div>
-      <div className="mt-10 w-full px-4 sm:px-10">
-        {couponList.map((coupon: Coupon) => (
+      <div className="mt-10 w-full">
+        {memoizedCouponList.map((coupon: Coupon) => (
           <div
             className="flex items-center bg-gray-100 mb-10 shadow"
-            key={coupon.coupon_id}
+            key={coupon.code}
           >
             <Link
-              to={`/coupon/${coupon.coupon_id}`}
+              to={`/coupon/${coupon.code}`}
               className="flex-auto text-left px-4 py-2 m-2"
             >
               <p className="text-gray-900 leading-none">{coupon.name}</p>
@@ -132,7 +163,7 @@ const Home = () => {
               </span>
             </Link>
             <div className="flex-auto text-right px-4 py-2 m-2">
-              <Link to={`/coupon/update/${coupon.coupon_id}`}>
+              <Link to={`/coupon/update/${coupon.code}`}>
                 <button
                   title="Edit"
                   className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold mr-3 py-2 px-4 rounded-full inline-flex items-center"
@@ -157,7 +188,7 @@ const Home = () => {
               <button
                 title="Remove"
                 onClick={() => {
-                  deleteCoupon(coupon.coupon_id);
+                  deleteCoupon(coupon.code);
                 }}
                 className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-full inline-flex items-center"
               >
@@ -183,6 +214,31 @@ const Home = () => {
           </div>
         ))}
       </div>
+      <Pagination
+        currentLimit={page.currentLimit}
+        totalPages={page.totalPages}
+        isNext={page.next ? true : false}
+        isPrevious={page.previous ? true : false}
+        currentPage={page.currentPage}
+        onNext={() => {
+          setSearchParams({
+            page: (page.currentPage + 1).toString(),
+            limit: page.currentLimit.toString(),
+          });
+        }}
+        onPrevious={() => {
+          setSearchParams({
+            page: (page.currentPage - 1).toString(),
+            limit: page.currentLimit.toString(),
+          });
+        }}
+        onClickIndex={(index: number) => {
+          setSearchParams({
+            page: index.toString(),
+            limit: page.currentLimit.toString(),
+          });
+        }}
+      />
     </div>
   );
 };

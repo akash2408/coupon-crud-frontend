@@ -39,12 +39,12 @@ function AppRoutes() {
   return (
     <Routes location={location}>
       <Route path="/" element={<Home />} />
-      <Route path="/home" element={<Home />} />
+      <Route path="/coupon" element={<Home />} />
       <Route path="/404" element={<Page404 />} />
       <Route path="/coupon/create" element={<CreateCoupon />} />
       <Route path="/user/apply_coupon" element={<ApplyCoupon />} />
-      <Route path="/coupon/update/:coupon_id" element={<UpdateCoupon />} />
-      <Route path="/coupon/:coupon_id" element={<ViewCoupon />} />
+      <Route path="/coupon/update/:code" element={<UpdateCoupon />} />
+      <Route path="/coupon/:code" element={<ViewCoupon />} />
       <Route path="*" element={<Navigate to="/404" />} />
     </Routes>
   );

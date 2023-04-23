@@ -6,6 +6,7 @@ import axios, { AxiosError } from "axios";
 import Delete from "../Assets/Icons/Delete";
 import { toast } from "react-toastify";
 import { baseURL } from "../Constants/urls";
+import moment from "moment";
 
 export interface AgeGroup {
   start_age: number | null;
@@ -44,6 +45,8 @@ const CreateCoupon = () => {
     discount: null,
     start_date: null,
     category: null,
+    dfs: null,
+    age_groups: null,
   });
 
   const navigate = useNavigate();
@@ -58,6 +61,8 @@ const CreateCoupon = () => {
       discount: null,
       start_date: null,
       category: null,
+      dfs: null,
+      age_groups: null,
     });
 
     var valid = true;
@@ -82,6 +87,16 @@ const CreateCoupon = () => {
       });
     }
 
+    if (coupon.code && coupon.code.trim().length > 6) {
+      valid = false;
+      setError((preValue: any) => {
+        return {
+          ...preValue,
+          code: "code cannot be more then 6 character",
+        };
+      });
+    }
+
     if (!coupon.type || coupon.type.trim().length === 0) {
       valid = false;
       setError((preValue: any) => {
@@ -102,30 +117,10 @@ const CreateCoupon = () => {
       });
     }
 
-    if (!coupon.start_date) {
-      valid = false;
-      setError((preValue: any) => {
-        return {
-          ...preValue,
-          location: "start date cannot be empty",
-        };
-      });
-    }
-
-    if (!coupon.start_date) {
-      valid = false;
-      setError((preValue: any) => {
-        return {
-          ...preValue,
-          start_date: "start date cannot be empty",
-        };
-      });
-    }
-
     if (
       coupon.start_date &&
       coupon.end_date &&
-      coupon.end_date <= coupon.start_date
+      coupon.end_date < coupon.start_date
     ) {
       valid = false;
       setError((preValue: any) => {
@@ -142,6 +137,58 @@ const CreateCoupon = () => {
         return {
           ...preValue,
           category: "category cannot be empty",
+        };
+      });
+    }
+
+    if (
+      coupon.category === CouponCategory.DFS &&
+      (!coupon.dfs || (coupon.dfs && coupon.dfs.trim().length === 0))
+    ) {
+      valid = false;
+      setError((preValue: any) => {
+        return {
+          ...preValue,
+          dfs: "DFS cannot be empty",
+        };
+      });
+    }
+
+    if (coupon.category === CouponCategory.DFS) {
+      if (coupon.dfs) {
+        let newdfs = null;
+        let dfs = coupon.dfs;
+        const len = coupon.dfs.length;
+        if (coupon.dfs[len - 1] === ",") {
+          dfs = coupon.dfs.substring(0, len - 1);
+        }
+
+        newdfs = dfs.split(",").map(Number);
+
+        for (let days of newdfs) {
+          if (!days || days < 0) {
+            valid = false;
+            setError((preValue: any) => {
+              return {
+                ...preValue,
+                dfs: "DFS format is not correct",
+              };
+            });
+            break;
+          }
+        }
+      }
+    }
+
+    if (
+      coupon.category === CouponCategory.AGE_GROUP &&
+      (!coupon.dfs || (coupon.age_groups && coupon.age_groups.length === 0))
+    ) {
+      valid = false;
+      setError((preValue: any) => {
+        return {
+          ...preValue,
+          age_groups: "At least 1 age group should be present",
         };
       });
     }
@@ -196,17 +243,15 @@ const CreateCoupon = () => {
         age_groups: coupon.age_groups,
         dfs: newdfs,
       };
-
       const response = await axios.post(url, body);
 
       const data = response.data;
 
       if (data) {
-        console.log(data);
         if (data.msg) {
           toast.success(data?.msg);
         }
-        navigate(`/coupon/${data.coupon.coupon_id}`, { replace: true });
+        navigate(`/coupon`, { replace: true });
       }
     } catch (err) {
       const axiosError = err as AxiosError;
@@ -264,8 +309,8 @@ const CreateCoupon = () => {
           <input
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:text-gray-600 focus:shadow-outline"
             name="code"
+            onChange={inputEvent}
             value={coupon.code ? coupon.code : ""}
-            disabled={true}
             type="text"
             placeholder="Generate code"
           />
@@ -344,15 +389,14 @@ const CreateCoupon = () => {
           className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
           htmlFor="start_date"
         >
-          Start Date
+          Start Date (Optional)
         </label>
         <input
           className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:text-gray-600"
           name="start_date"
           value={coupon.start_date ? coupon.start_date.toString() : ""}
           onChange={inputEvent}
-          type="text"
-          placeholder="2023-04-16"
+          type="date"
         />
         {error.start_date && (
           <div className=" text-red-900 text-xs mt-2">{error.start_date}</div>
@@ -371,8 +415,7 @@ const CreateCoupon = () => {
           name="end_date"
           value={coupon.end_date ? coupon.end_date.toString() : ""}
           onChange={inputEvent}
-          type="text"
-          placeholder="2023-04-16"
+          type="date"
         />
       </div>
 
@@ -455,6 +498,9 @@ const CreateCoupon = () => {
           <div className="w-full flex flex-row justify-center mt-2">
             <NewAgeGroup age_groups={coupon.age_groups} setCoupon={setCoupon} />
           </div>
+          {error.age_groups && (
+            <div className=" text-red-900 text-xs mt-2">{error.age_groups}</div>
+          )}
         </div>
       )}
 
@@ -474,6 +520,9 @@ const CreateCoupon = () => {
             type="text"
             placeholder="1,2,3,"
           />
+          {error.dfs && (
+            <div className=" text-red-900 text-xs mt-2">{error.dfs}</div>
+          )}
         </div>
       )}
 

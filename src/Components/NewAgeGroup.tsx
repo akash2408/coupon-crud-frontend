@@ -75,6 +75,16 @@ const NewAgeGroup = ({ age_groups, setCoupon }: Props) => {
       });
     }
 
+    if (newAgeGroup.start_age && newAgeGroup.start_age < 0) {
+      valid = false;
+      setError((preValue: any) => {
+        return {
+          ...preValue,
+          start_age: "Start age cannot be negative",
+        };
+      });
+    }
+
     if (!newAgeGroup.end_age) {
       valid = false;
       setError((preValue: any) => {
@@ -85,10 +95,20 @@ const NewAgeGroup = ({ age_groups, setCoupon }: Props) => {
       });
     }
 
+    if (newAgeGroup.end_age && newAgeGroup.end_age < 0) {
+      valid = false;
+      setError((preValue: any) => {
+        return {
+          ...preValue,
+          end_age: "End age cannot be negative",
+        };
+      });
+    }
+
     if (
       newAgeGroup.end_age &&
       newAgeGroup.start_age &&
-      parseInt(newAgeGroup.end_age.toString()) <=
+      parseInt(newAgeGroup.end_age.toString()) <
         parseInt(newAgeGroup.start_age.toString())
     ) {
       valid = false;
@@ -134,7 +154,9 @@ const NewAgeGroup = ({ age_groups, setCoupon }: Props) => {
                 Start Age
               </label>
               <input
-                type="text"
+                type="number"
+                min={0}
+                pattern="[0-9]*"
                 name="start_age"
                 value={newAgeGroup.start_age ? newAgeGroup.start_age : ""}
                 onChange={inputEvent}
@@ -156,7 +178,9 @@ const NewAgeGroup = ({ age_groups, setCoupon }: Props) => {
                 end_age
               </label>
               <input
-                type="text"
+                type="number"
+                min={0}
+                pattern="[0-9]*"
                 name="end_age"
                 value={newAgeGroup.end_age ? newAgeGroup.end_age : ""}
                 onChange={inputEvent}

@@ -37,7 +37,6 @@ const ApplyCoupon = () => {
       const data = response.data;
 
       if (data) {
-        console.log(data);
         if (data.msg) {
           toast.success(data?.msg);
         }
