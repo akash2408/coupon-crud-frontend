@@ -201,7 +201,8 @@ const UpdateCoupon = () => {
 
     if (
       coupon.category === CouponCategory.AGE_GROUP &&
-      (!coupon.dfs || (coupon.age_groups && coupon.age_groups.length === 0))
+      (!coupon.age_groups ||
+        (coupon.age_groups && coupon.age_groups.length === 0))
     ) {
       valid = false;
       setError((preValue: any) => {
