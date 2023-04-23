@@ -241,7 +241,10 @@ const UpdateCoupon = () => {
         name: coupon.name,
         type: coupon.type,
         discount: coupon.discount,
-        start_date: coupon.start_date,
+        start_date:
+          coupon.start_date && coupon.start_date.toString().trim().length !== 0
+            ? coupon.start_date
+            : null,
         end_date:
           coupon.end_date && coupon.end_date.toString().trim().length !== 0
             ? coupon.end_date
@@ -250,6 +253,8 @@ const UpdateCoupon = () => {
         age_groups: coupon.age_groups,
         dfs: newdfs,
       };
+
+      console.log(body);
       const response = await axios.patch(url, body);
 
       const data = response.data;

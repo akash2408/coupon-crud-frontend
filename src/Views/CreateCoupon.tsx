@@ -238,8 +238,14 @@ const CreateCoupon = () => {
         code: coupon.code,
         type: coupon.type,
         discount: coupon.discount,
-        start_date: coupon.start_date,
-        end_date: coupon.end_date,
+        start_date:
+          coupon.start_date && coupon.start_date.toString().trim().length !== 0
+            ? coupon.start_date
+            : null,
+        end_date:
+          coupon.end_date && coupon.end_date.toString().trim().length !== 0
+            ? coupon.end_date
+            : null,
         category: coupon.category,
         age_groups: coupon.age_groups,
         dfs: newdfs,
