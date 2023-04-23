@@ -63,16 +63,16 @@ const UpdateCoupon = () => {
       if (data) {
         const couponData = data.coupon;
         const dfs = couponData.dfs;
-        const start_date = moment(couponData.start_date.toString()).format(
-          "YYYY-MM-DD"
-        );
+        const start_date = couponData.start_date
+          ? moment(couponData.start_date.toString()).format("YYYY-MM-DD")
+          : null;
         const end_date = couponData.end_date
           ? moment(couponData.end_date.toString()).format("YYYY-MM-DD")
           : null;
         setCoupon({
           ...couponData,
           dfs: couponData.dfs ? dfs.toString() : null,
-          start_date: start_date.toString(),
+          start_date: start_date,
           end_date: end_date,
           age_groups: couponData.age_groups ? couponData.age_groups : [],
         });
